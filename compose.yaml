@@ -12,6 +12,10 @@ services:
     depends_on:
       mongo:
         condition: service_started
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
 
   mongo:
     container_name: mongo
