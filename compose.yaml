@@ -2,21 +2,6 @@
 
 # https://github.com/docker/awesome-compose
 services:
-  app:
-    container_name: app
-    build:
-      context: .
-      target: final
-    ports:
-      - ${APP_PORT}:${APP_PORT}
-    depends_on:
-      mongo:
-        condition: service_started
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
-      - MONGO_HOST=${MONGO_HOST}
-
   mongo:
     container_name: mongo
     image: mongo

@@ -1,19 +1,17 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
+	"github.com/witekblach/fridge/data"
+	"github.com/witekblach/fridge/db"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 )
 
 func main() {
@@ -27,21 +25,40 @@ func main() {
 
 func actualMain() error {
 	godotenv.Load()
-	slog.Info("NewMongoClient")
-	client, err := NewMongoClient()
+
+	err := db.NewMongoClient()
 	if err != nil {
 		return err
 	}
 
-	slog.Info("NewRouter")
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	r.Get("/", client.ShowAllIngredients)
+	r.Use(middleware.Timeout(60 * time.Second))
 
-	r.Post("/ingredient", client.AddIngredient)
+	r.Get("/", homepageHandler)
+
+	r.Route("/ingredient", func(r chi.Router) {
+		r.Post("/", postIngredientHandler)
+		//	r.With(paginate).Get("/{month}-{day}-{year}", listArticlesByDate) // GET /articles/01-16-2017
+		//
+		//	r.Post("/", createArticle)                                        // POST /articles
+		//	r.Get("/search", searchArticles)                                  // GET /articles/search
+		//
+		//	// Regexp url parameters:
+		//	r.Get("/{articleSlug:[a-z-]+}", getArticleBySlug)                // GET /articles/home-is-toronto
+		//
+		//	// Subrouters:
+		//	r.Route("/{articleID}", func(r chi.Router) {
+		//		r.Use(ArticleCtx)
+		//		r.Get("/", getArticle)                                          // GET /articles/123
+		//		r.Put("/", updateArticle)                                       // PUT /articles/123
+		//		r.Delete("/", deleteArticle)                                    // DELETE /articles/123
+		//	})
+	})
 
 	slog.Info("ListenAndServe on " + ":" + os.Getenv("APP_PORT"))
 	http.ListenAndServe(":"+os.Getenv("APP_PORT"), r)
@@ -49,63 +66,37 @@ func actualMain() error {
 	return nil
 }
 
-func (mc MongoClient) AddIngredient(w http.ResponseWriter, r *http.Request) {
-	slog.Info("AddIngredient called")
-
-	coll := mc.client.Database("fridge").Collection("ingredients")
-
-	catFact := bson.D{{"foo", "bar"}, {"hello", "world"}, {"pi", 3.14159}}
-
-	slog.Info("InsertOne")
-	_, err := coll.InsertOne(context.TODO(), catFact)
-	if err != nil {
-		slog.Error("InsertOne")
-	}
-}
-
-func (mc MongoClient) ShowAllIngredients(w http.ResponseWriter, r *http.Request) {
-	slog.Info("ShowAllIngredients called")
-	coll := mc.client.Database("fridge").Collection("ingredients")
-
-	query := bson.M{}
-	cursor, err := coll.Find(context.TODO(), query)
+func homepageHandler(w http.ResponseWriter, r *http.Request) {
+	ingredients, err := data.ShowAllIngredients()
 	if err != nil {
 		slog.Error(err.Error())
-	}
-
-	results := []bson.M{}
-	if err = cursor.All(context.TODO(), &results); err != nil {
-		log.Fatal(err)
+		os.Exit(1)
 	}
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(results)
-
+	json.NewEncoder(w).Encode(ingredients)
 }
 
-type MongoClient struct {
-	client *mongo.Client
-}
-
-func (mc MongoClient) start() error {
-	return nil
-}
-
-func NewMongoClient() (*MongoClient, error) {
-	var (
-		dbUser     = os.Getenv("MONGO_INITDB_ROOT_USERNAME")
-		dbPassword = os.Getenv("MONGO_INITDB_ROOT_PASSWORD")
-		dbHost     = os.Getenv("DB_HOST")
-		uri        = fmt.Sprintf("mongodb://%s:%s@%s:27017", dbUser, dbPassword, dbHost)
-	)
-
-	slog.Info(uri)
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
-
+func postIngredientHandler(w http.ResponseWriter, r *http.Request) {
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		return nil, err
+		slog.Error(err.Error())
+		os.Exit(1)
 	}
 
-	return &MongoClient{client}, err
+	var req data.CreateIngredientRequest
+	err = json.Unmarshal(body, &req)
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+
+	ingredientToAdd := data.Ingredient{Name: req.Name}
+
+	data.AddIngredient(ingredientToAdd)
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(ingredientToAdd)
 }
