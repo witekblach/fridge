@@ -11,7 +11,7 @@ import (
 )
 
 type Ingredient struct {
-	Name string
+	Name string `json:"name"`
 }
 
 type CreateIngredientRequest struct {
@@ -30,9 +30,11 @@ func ShowAllIngredients() ([]Ingredient, error) {
 	}
 
 	var result []Ingredient
-	if err = cursor.All(context.TODO(), &result); err != nil {
+	err = cursor.All(context.TODO(), &result)
+	if err != nil {
 		log.Fatal(err)
 	}
+
 	slog.Info(fmt.Sprintf("%+v", result))
 	return result, nil
 }
