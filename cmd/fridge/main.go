@@ -14,14 +14,16 @@ func main() {
 
 	if err != nil {
 		slog.Error(err.Error())
-		os.Exit(1)
 	}
 }
 
 func actualMain() error {
-	godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+		return err
+	}
 
-	err := db.NewMongoClient()
+	err = db.NewMongoClient()
 	if err != nil {
 		return err
 	}

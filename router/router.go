@@ -1,13 +1,10 @@
 package router
 
 import (
-	"context"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/witekblach/fridge/data"
 	"github.com/witekblach/fridge/handler"
 	"github.com/witekblach/fridge/handler/ingredient"
-	"net/http"
 	"time"
 )
 
@@ -35,7 +32,7 @@ func NewChiRouter() *chi.Mux {
 		//
 		//	// Subrouters:
 		r.Route("/{ingredientName}", func(r chi.Router) {
-			r.Use(IngredientsCtx)
+			r.Use(ingredient.IngredientsCtx)
 			r.Delete("/", ingredient.Delete)
 			//r.Get("/", getArticle)       // GET /articles/123
 			//r.Put("/", updateArticle)    // PUT /articles/123
@@ -44,20 +41,4 @@ func NewChiRouter() *chi.Mux {
 	})
 
 	return r
-}
-
-func IngredientsCtx(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ingredientName := chi.URLParam(r, "ingredientName")
-
-		getIngredient, err := data.GetIngredient(ingredientName)
-		if err != nil {
-			http.Error(w, http.StatusText(404), 404)
-			return
-		}
-
-		ctx := context.WithValue(r.Context(), "ingredient", getIngredient)
-
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
 }

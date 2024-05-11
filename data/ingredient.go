@@ -35,7 +35,6 @@ func ShowAllIngredients() ([]Ingredient, error) {
 		log.Fatal(err)
 	}
 
-	slog.Info(fmt.Sprintf("%+v", result))
 	return result, nil
 }
 
@@ -67,4 +66,19 @@ func GetIngredient(name string) (*Ingredient, error) {
 	}
 
 	return &result, nil
+}
+
+func RemoveIngredient(ingredient Ingredient) error {
+	coll := db.Mongo.Database("fridge").Collection("ingredients")
+
+	slog.Info(ingredient.Name)
+
+	deletedCount, err := coll.DeleteOne(context.TODO(), bson.D{{"name", ingredient.Name}})
+	if err != nil {
+		return err
+	}
+
+	slog.Info(fmt.Sprint(deletedCount.DeletedCount))
+
+	return nil
 }
