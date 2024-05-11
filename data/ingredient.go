@@ -50,3 +50,21 @@ func AddIngredient(ingredient Ingredient) {
 		os.Exit(1)
 	}
 }
+
+func GetIngredient(name string) (*Ingredient, error) {
+	coll := db.Mongo.Database("fridge").Collection("ingredients")
+
+	cursor, err := coll.Find(context.TODO(), bson.D{{"name", name}})
+	if err != nil {
+		return nil, err
+
+	}
+
+	var result Ingredient
+	cursor.Next(context.TODO())
+	if err = cursor.Decode(&result); err != nil {
+		log.Fatal(err)
+	}
+
+	return &result, nil
+}

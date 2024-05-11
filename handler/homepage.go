@@ -9,7 +9,6 @@ import (
 )
 
 func HomepageHandler(w http.ResponseWriter, r *http.Request) {
-	slog.Info("AAA")
 	ingredients, err := data.ShowAllIngredients()
 	if err != nil {
 		slog.Error(err.Error())
