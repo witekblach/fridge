@@ -25,7 +25,10 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	ingredientToAdd := data.Ingredient{Name: req.Name}
 
-	data.AddIngredient(ingredientToAdd)
+	err = data.AddIngredient(ingredientToAdd)
+	if err != nil {
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Content-Type", "application/json")

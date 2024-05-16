@@ -42,6 +42,8 @@ go.work
 
 # air tmp folder
 /tmp
+# compiled app - i don't want it
+fridge
 
 # Sensitive or high-churn files
 .idea/**/dataSources/

@@ -3,20 +3,13 @@ package ingredient
 import (
 	"encoding/json"
 	"github.com/witekblach/fridge/data"
-	"log/slog"
 	"net/http"
 )
 
-func Delete(w http.ResponseWriter, r *http.Request) {
-	ingredientToRemove := r.Context().Value("ingredient").(*data.Ingredient)
-
-	err := data.RemoveIngredient(*ingredientToRemove)
-	if err != nil {
-		slog.Error(err.Error())
-		return
-	}
+func Get(w http.ResponseWriter, r *http.Request) {
+	ingredient := r.Context().Value("ingredient").(*data.Ingredient)
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(ingredientToRemove)
+	json.NewEncoder(w).Encode(ingredient)
 }

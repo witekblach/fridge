@@ -2,24 +2,25 @@ package data
 
 import (
 	"context"
-	"fmt"
 	"github.com/witekblach/fridge/db"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"log/slog"
 	"os"
 )
 
 type Ingredient struct {
-	Name string `json:"name"`
+	Id     primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Name   string             `bson:"name,omitempty" json:"name"`
+	Amount string             `bson:"amount,omitempty" json:"amount"`
 }
 
 type CreateIngredientRequest struct {
-	Name string `json:"name"`
+	Name string `bson:"name" json:"name"`
 }
 
 func ShowAllIngredients() ([]Ingredient, error) {
-	slog.Info("ShowAllIngredients called")
 	coll := db.Mongo.Database("fridge").Collection("ingredients")
 
 	query := bson.M{}
@@ -38,16 +39,15 @@ func ShowAllIngredients() ([]Ingredient, error) {
 	return result, nil
 }
 
-func AddIngredient(ingredient Ingredient) {
-	slog.Info("AddIngredient called")
-
+func AddIngredient(ingredient Ingredient) error {
 	coll := db.Mongo.Database("fridge").Collection("ingredients")
 
 	_, err := coll.InsertOne(context.TODO(), ingredient)
 	if err != nil {
-		slog.Error(err.Error())
-		os.Exit(1)
+		return err
 	}
+
+	return nil
 }
 
 func GetIngredient(name string) (*Ingredient, error) {
@@ -71,14 +71,10 @@ func GetIngredient(name string) (*Ingredient, error) {
 func RemoveIngredient(ingredient Ingredient) error {
 	coll := db.Mongo.Database("fridge").Collection("ingredients")
 
-	slog.Info(ingredient.Name)
-
-	deletedCount, err := coll.DeleteOne(context.TODO(), bson.D{{"name", ingredient.Name}})
+	_, err := coll.DeleteOne(context.TODO(), bson.D{{"name", ingredient.Name}})
 	if err != nil {
 		return err
 	}
-
-	slog.Info(fmt.Sprint(deletedCount.DeletedCount))
 
 	return nil
 }
