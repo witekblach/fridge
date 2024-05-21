@@ -1,3 +1,8 @@
+typesense/typesense-data/*
+# air tmp folder
+tmp
+# compiled app - i don't want it
+fridge
 .env
 
 ### Go template
@@ -39,11 +44,6 @@ go.work
 
 # Generated files
 .idea/**/contentModel.xml
-
-# air tmp folder
-/tmp
-# compiled app - i don't want it
-fridge
 
 # Sensitive or high-churn files
 .idea/**/dataSources/

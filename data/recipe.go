@@ -1,9 +1,9 @@
 package data
 
 type Recipe struct {
-	Name        string
-	Ingredients []Ingredient
-	Instruction string
+	Name        string       `json:"name"`
+	Ingredients []Ingredient `json:"ingredients"`
+	Instruction string       `json:"instruction"`
 }
 
 //type Ingredient struct {
@@ -18,7 +18,7 @@ type Recipe struct {
 //
 //func ShowAllIngredients() ([]Ingredient, error) {
 //	slog.Info("ShowAllIngredients called")
-//	coll := db.Mongo.Database("fridge").Collection("ingredients")
+//	coll := db.Mongo.Database("api").Collection("ingredients")
 //
 //	query := bson.M{}
 //	cursor, err := coll.Find(context.TODO(), query)
@@ -37,7 +37,7 @@ type Recipe struct {
 //}
 //
 //func AddIngredient(ingredient Ingredient) error {
-//	coll := db.Mongo.Database("fridge").Collection("ingredients")
+//	coll := db.Mongo.Database("api").Collection("ingredients")
 //
 //	_, err := coll.InsertOne(context.TODO(), ingredient)
 //	if err != nil {
@@ -48,7 +48,7 @@ type Recipe struct {
 //}
 //
 //func GetIngredient(name string) (*Ingredient, error) {
-//	coll := db.Mongo.Database("fridge").Collection("ingredients")
+//	coll := db.Mongo.Database("api").Collection("ingredients")
 //
 //	cursor, err := coll.Find(context.TODO(), bson.D{{"name", name}})
 //	if err != nil {
@@ -66,7 +66,7 @@ type Recipe struct {
 //}
 //
 //func RemoveIngredient(ingredient Ingredient) error {
-//	coll := db.Mongo.Database("fridge").Collection("ingredients")
+//	coll := db.Mongo.Database("api").Collection("ingredients")
 //
 //	_, err := coll.DeleteOne(context.TODO(), bson.D{{"name", ingredient.Name}})
 //	if err != nil {

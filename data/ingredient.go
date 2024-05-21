@@ -17,7 +17,7 @@ type Ingredient struct {
 }
 
 type CreateIngredientRequest struct {
-	Name string `bson:"name" json:"name"`
+	Name string `json:"name"`
 }
 
 func ShowAllIngredients() ([]Ingredient, error) {
