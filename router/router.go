@@ -20,6 +20,7 @@ func NewChiRouter() *chi.Mux {
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Get("/", handler.HomepageHandler)
+	r.Get("/typesense", handler.TypesenseHandler)
 
 	r.Route("/ingredients", func(r chi.Router) {
 		r.Post("/", ingredientHandler.Create)
