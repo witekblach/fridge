@@ -18,7 +18,7 @@ func TypesenseHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	searchParameters := &api.SearchCollectionParams{
-		Q:       "chicken",
+		Q:       r.URL.Query().Get("q"),
 		QueryBy: typesense.CollectionIngredientName,
 	}
 
